@@ -20,4 +20,15 @@ defmodule ExPolars.DataFrameTest do
     assert Series.name(series) == {:ok, "b"}
     assert Series.len(series) == {:ok, 5}
   end
+
+  test "slice via Access" do
+    {:ok, df} = Df.read_parquet("test/data/testdata.parquet")
+    assert Df.shape(df[1..3]) == {:ok, {2, 3}}
+  end
+
+  test "select columns via Access" do
+    {:ok, df} = Df.read_parquet("test/data/testdata.parquet")
+    assert Df.columns(df[["a", "b"]]) == {:ok, ["a", "b"]}
+    assert Series.name(df["c"]) == {:ok, "c"}
+  end
 end

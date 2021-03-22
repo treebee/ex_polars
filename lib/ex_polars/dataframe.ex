@@ -8,6 +8,33 @@ defmodule ExPolars.DataFrame do
 
   defstruct [:inner]
 
+  @behaviour Access
+
+  @impl true
+  def fetch(df, %Range{} = rows) do
+    slice(df, rows.first, rows.last - rows.first)
+  end
+
+  @impl true
+  def fetch(df, columns) when is_list(columns) do
+    select(df, columns)
+  end
+
+  @impl true
+  def fetch(df, column) do
+    column(df, column)
+  end
+
+  @impl true
+  def pop(_df, _key) do
+    raise "pop not supported for DataFrame"
+  end
+
+  @impl true
+  def get_and_update(_df, _key, _function) do
+    raise "get_and_update not supported for DataFrame"
+  end
+
   @spec read_csv(
           String.t(),
           integer(),
