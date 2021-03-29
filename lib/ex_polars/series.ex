@@ -422,41 +422,49 @@ defmodule ExPolars.Series do
   def get_list({:ok, s}, index), do: get_list(s, index)
   defdelegate get_list(s, index), to: Native, as: :s_get_list
 
-  @spec rolling_sum(s() | {:ok, s()}, integer(), nil | list(float()), boolean()) ::
+  @spec rolling_sum(s() | {:ok, s()}, integer(), nil | list(float()), boolean(), nil | integer()) ::
           {:ok, s()} | {:error, term}
-  def rolling_sum(s, window_size, weight \\ nil, ignore_null \\ false)
+  def rolling_sum(s, window_size, weight \\ nil, ignore_null \\ false, min_periods \\ nil)
 
-  def rolling_sum({:ok, s}, window_size, weight, ignore_null),
-    do: rolling_sum(s, window_size, weight, ignore_null)
+  def rolling_sum({:ok, s}, window_size, weight, ignore_null, min_periods),
+    do: rolling_sum(s, window_size, weight, ignore_null, min_periods)
 
-  defdelegate rolling_sum(s, window_size, weight, ignore_null), to: Native, as: :s_rolling_sum
+  defdelegate rolling_sum(s, window_size, weight, ignore_null, min_periods),
+    to: Native,
+    as: :s_rolling_sum
 
-  @spec rolling_mean(s() | {:ok, s()}, integer(), nil | list(float()), boolean()) ::
+  @spec rolling_mean(s() | {:ok, s()}, integer(), nil | list(float()), boolean(), nil | integer()) ::
           {:ok, s()} | {:error, term}
-  def rolling_mean(s, window_size, weight \\ nil, ignore_null \\ false)
+  def rolling_mean(s, window_size, weight \\ nil, ignore_null \\ false, min_periods \\ nil)
 
-  def rolling_mean({:ok, s}, window_size, weight, ignore_null),
-    do: rolling_mean(s, window_size, weight, ignore_null)
+  def rolling_mean({:ok, s}, window_size, weight, ignore_null, min_periods),
+    do: rolling_mean(s, window_size, weight, ignore_null, min_periods)
 
-  defdelegate rolling_mean(s, window_size, weight, ignore_null), to: Native, as: :s_rolling_mean
+  defdelegate rolling_mean(s, window_size, weight, ignore_null, min_periods),
+    to: Native,
+    as: :s_rolling_mean
 
-  @spec rolling_max(s() | {:ok, s()}, integer(), nil | list(float()), boolean()) ::
+  @spec rolling_max(s() | {:ok, s()}, integer(), nil | list(float()), boolean(), nil | integer()) ::
           {:ok, s()} | {:error, term}
-  def rolling_max(s, window_size, weight \\ nil, ignore_null \\ false)
+  def rolling_max(s, window_size, weight \\ nil, ignore_null \\ false, min_periods \\ nil)
 
-  def rolling_max({:ok, s}, window_size, weight, ignore_null),
-    do: rolling_max(s, window_size, weight, ignore_null)
+  def rolling_max({:ok, s}, window_size, weight, ignore_null, min_periods),
+    do: rolling_max(s, window_size, weight, ignore_null, min_periods)
 
-  defdelegate rolling_max(s, window_size, weight, ignore_null), to: Native, as: :s_rolling_max
+  defdelegate rolling_max(s, window_size, weight, ignore_null, min_periods),
+    to: Native,
+    as: :s_rolling_max
 
-  @spec rolling_min(s() | {:ok, s()}, integer(), nil | list(float()), boolean()) ::
+  @spec rolling_min(s() | {:ok, s()}, integer(), nil | list(float()), boolean(), nil | integer()) ::
           {:ok, s()} | {:error, term}
-  def rolling_min(s, window_size, weight \\ nil, ignore_null \\ false)
+  def rolling_min(s, window_size, weight \\ nil, ignore_null \\ false, min_periods \\ nil)
 
-  def rolling_min({:ok, s}, window_size, weight, ignore_null),
-    do: rolling_min(s, window_size, weight, ignore_null)
+  def rolling_min({:ok, s}, window_size, weight, ignore_null, min_periods),
+    do: rolling_min(s, window_size, weight, ignore_null, min_periods)
 
-  defdelegate rolling_min(s, window_size, weight, ignore_null), to: Native, as: :s_rolling_min
+  defdelegate rolling_min(s, window_size, weight, ignore_null, min_periods),
+    to: Native,
+    as: :s_rolling_min
 
   @spec year(s() | {:ok, s()}) :: {:ok, s()} | {:error, term}
   def year({:ok, s}), do: year(s)

@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 rustler = "0.22.0-rc.0"
-polars = { version = "0.12.1", features = ["parquet", "json", "simd", "lazy", "strings", "temporal", "random", "object", "ipc"] }
+polars = { version = "0.12.0", git = "https://github.com/ritchie46/polars/", rev = "4abb371ac60530f0428d6adb2300f66958097094", features = ["parquet", "json", "simd", "lazy", "strings", "temporal", "random", "object", "ipc", "dtype-u8", "dtype-u16", "dtype-u64", "dtype-i8", "dtype-i16", "dtype-date32", "dtype-date64", "dtype-time64-ns", "dtype-duration-ns", "dtype-duration-ms"] }
 
 arrow = {version="4.0.0-SNAPSHOT", git = "https://github.com/apache/arrow", rev = "f7b143959ec77a79a3e11bcb83e24eaf0d03697c", default-features=false}
 parquet = {version = "4.0.0-SNAPSHOT", optional = true, git = "https://github.com/apache/arrow", rev = "f7b143959ec77a79a3e11bcb83e24eaf0d03697c"}

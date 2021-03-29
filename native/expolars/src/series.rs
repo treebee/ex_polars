@@ -58,7 +58,7 @@ pub fn s_new_str(name: &str, val: Vec<&str>) -> ExSeries {
 #[rustler::nif]
 pub fn s_rechunk(data: ExSeries) -> Result<ExSeries, ExPolarsError> {
     let s = &data.inner.0;
-    let series = s.rechunk().expect("should not fail");
+    let series = s.rechunk();
     Ok(ExSeries::new(series))
 }
 
@@ -101,7 +101,7 @@ pub fn s_limit(data: ExSeries, num_elements: usize) -> Result<ExSeries, ExPolars
 }
 
 #[rustler::nif]
-pub fn s_slice(data: ExSeries, offset: usize, length: usize) -> Result<ExSeries, ExPolarsError> {
+pub fn s_slice(data: ExSeries, offset: i64, length: usize) -> Result<ExSeries, ExPolarsError> {
     let s = &data.inner.0;
     let series = s.slice(offset, length)?;
     Ok(ExSeries::new(series))
@@ -174,9 +174,9 @@ pub fn s_sort(data: ExSeries, reverse: bool) -> Result<ExSeries, ExPolarsError> 
 }
 
 #[rustler::nif]
-pub fn s_argsort(data: ExSeries, reverse: bool) -> Result<Vec<usize>, ExPolarsError> {
+pub fn s_argsort(data: ExSeries, reverse: bool) -> Result<Vec<Option<u32>>, ExPolarsError> {
     let s = &data.inner.0;
-    Ok(s.argsort(reverse))
+    Ok(s.argsort(reverse).into_iter().collect::<Vec<Option<u32>>>())
 }
 
 #[rustler::nif]
@@ -194,16 +194,17 @@ pub fn s_value_counts(data: ExSeries) -> Result<ExDataFrame, ExPolarsError> {
 }
 
 #[rustler::nif]
-pub fn s_arg_unique(data: ExSeries) -> Result<Vec<usize>, ExPolarsError> {
+pub fn s_arg_unique(data: ExSeries) -> Result<Vec<Option<u32>>, ExPolarsError> {
     let s = &data.inner.0;
-    let arg_unique = s.arg_unique()?;
+    let arg_unique = s.arg_unique()?.into_iter().collect::<Vec<Option<u32>>>();
     Ok(arg_unique)
 }
 
 #[rustler::nif]
-pub fn s_take(data: ExSeries, indices: Vec<usize>) -> Result<ExSeries, ExPolarsError> {
+pub fn s_take(data: ExSeries, indices: Vec<u32>) -> Result<ExSeries, ExPolarsError> {
     let s = &data.inner.0;
-    let s1 = s.take(&indices);
+    let idx = UInt32Chunked::new_from_slice("idx", indices.as_slice());
+    let s1 = s.take(&idx);
     Ok(ExSeries::new(s1))
 }
 
@@ -396,12 +397,8 @@ pub fn s_to_json(data: ExSeries) -> Result<String, ExPolarsError> {
         DataType::Int64 => serde_json::to_string(&s.i64().unwrap().data_views()),
         DataType::Float32 => serde_json::to_string(&s.f32().unwrap().data_views()),
         DataType::Float64 => serde_json::to_string(&s.f64().unwrap().data_views()),
-        DataType::Date32 => {
-            serde_json::to_string(&s.date32().unwrap().data_views())
-        }
-        DataType::Date64 => {
-            serde_json::to_string(&s.date64().unwrap().data_views())
-        }
+        DataType::Date32 => serde_json::to_string(&s.date32().unwrap().data_views()),
+        DataType::Date64 => serde_json::to_string(&s.date64().unwrap().data_views()),
         DataType::Time64(TimeUnit::Nanosecond) => {
             serde_json::to_string(&s.time64_nanosecond().unwrap().data_views())
         }
@@ -454,9 +451,9 @@ pub fn s_clone(data: ExSeries) -> Result<ExSeries, ExPolarsError> {
 }
 
 #[rustler::nif]
-pub fn s_shift(data: ExSeries, periods: i32) -> Result<ExSeries, ExPolarsError> {
+pub fn s_shift(data: ExSeries, periods: i64) -> Result<ExSeries, ExPolarsError> {
     let s = &data.inner.0;
-    let s1 = s.shift(periods)?;
+    let s1 = s.shift(periods);
     Ok(ExSeries::new(s1))
 }
 
@@ -591,48 +588,72 @@ pub fn s_get_list(data: ExSeries, index: usize) -> Option<ExSeries> {
 #[rustler::nif]
 pub fn s_rolling_sum(
     data: ExSeries,
-    window_size: usize,
+    window_size: u32,
     weight: Option<Vec<f64>>,
     ignore_null: bool,
+    min_periods: Option<u32>,
 ) -> Result<ExSeries, ExPolarsError> {
     let s = &data.inner.0;
-    let s1 = s.rolling_sum(window_size, weight.as_deref(), ignore_null)?;
+    let min_periods = if let Some(mp) = min_periods {
+        mp
+    } else {
+        window_size
+    };
+    let s1 = s.rolling_sum(window_size, weight.as_deref(), ignore_null, min_periods)?;
     Ok(ExSeries::new(s1))
 }
 
 #[rustler::nif]
 pub fn s_rolling_mean(
     data: ExSeries,
-    window_size: usize,
+    window_size: u32,
     weight: Option<Vec<f64>>,
     ignore_null: bool,
+    min_periods: Option<u32>,
 ) -> Result<ExSeries, ExPolarsError> {
+    let min_periods = if let Some(mp) = min_periods {
+        mp
+    } else {
+        window_size
+    };
     let s = &data.inner.0;
-    let s1 = s.rolling_mean(window_size, weight.as_deref(), ignore_null)?;
+    let s1 = s.rolling_mean(window_size, weight.as_deref(), ignore_null, min_periods)?;
     Ok(ExSeries::new(s1))
 }
 
 #[rustler::nif]
 pub fn s_rolling_max(
     data: ExSeries,
-    window_size: usize,
+    window_size: u32,
     weight: Option<Vec<f64>>,
     ignore_null: bool,
+    min_periods: Option<u32>,
 ) -> Result<ExSeries, ExPolarsError> {
+    let min_periods = if let Some(mp) = min_periods {
+        mp
+    } else {
+        window_size
+    };
     let s = &data.inner.0;
-    let s1 = s.rolling_max(window_size, weight.as_deref(), ignore_null)?;
+    let s1 = s.rolling_max(window_size, weight.as_deref(), ignore_null, min_periods)?;
     Ok(ExSeries::new(s1))
 }
 
 #[rustler::nif]
 pub fn s_rolling_min(
     data: ExSeries,
-    window_size: usize,
+    window_size: u32,
     weight: Option<Vec<f64>>,
     ignore_null: bool,
+    min_periods: Option<u32>,
 ) -> Result<ExSeries, ExPolarsError> {
+    let min_periods = if let Some(mp) = min_periods {
+        mp
+    } else {
+        window_size
+    };
     let s = &data.inner.0;
-    let s1 = s.rolling_min(window_size, weight.as_deref(), ignore_null)?;
+    let s1 = s.rolling_min(window_size, weight.as_deref(), ignore_null, min_periods)?;
     Ok(ExSeries::new(s1))
 }
 

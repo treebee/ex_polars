@@ -1,9 +1,9 @@
 // This file is modified based on: https://github.com/ritchie46/polars/blob/master/py-polars/src/datatypes.rs
 
-use std::sync::RwLock;
 use polars::prelude::*;
-use rustler::NifStruct;
 use rustler::resource::ResourceArc;
+use rustler::NifStruct;
+use std::sync::RwLock;
 
 use std::result::Result;
 
@@ -61,16 +61,15 @@ impl ExSeriesRef {
 impl ExDataFrame {
     pub fn new(df: DataFrame) -> Self {
         Self {
-            inner: ResourceArc::new(ExDataFrameRef::new(df))
+            inner: ResourceArc::new(ExDataFrameRef::new(df)),
         }
     }
 }
 
-
 impl ExSeries {
     pub fn new(s: Series) -> Self {
         Self {
-            inner: ResourceArc::new(ExSeriesRef::new(s))
+            inner: ResourceArc::new(ExSeriesRef::new(s)),
         }
     }
 }
@@ -92,8 +91,8 @@ impl From<&ArrowDataType> for DataType {
             ArrowDataType::Boolean => Bool,
             ArrowDataType::Utf8 => Utf8,
             ArrowDataType::List(_) => List,
-            ArrowDataType::Date32(_) => Date32,
-            ArrowDataType::Date64(_) => Date64,
+            ArrowDataType::Date32 => Date32,
+            ArrowDataType::Date64 => Date64,
             ArrowDataType::Time64(TimeUnit::Nanosecond) => Time64Nanosecond,
             ArrowDataType::Duration(TimeUnit::Nanosecond) => DurationNanosecond,
             ArrowDataType::Duration(TimeUnit::Millisecond) => DurationMillisecond,

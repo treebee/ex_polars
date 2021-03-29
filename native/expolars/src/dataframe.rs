@@ -397,9 +397,10 @@ pub fn df_filter(data: ExDataFrame, mask: ExSeries) -> Result<ExDataFrame, ExPol
 }
 
 #[rustler::nif]
-pub fn df_take(data: ExDataFrame, indices: Vec<usize>) -> Result<ExDataFrame, ExPolarsError> {
+pub fn df_take(data: ExDataFrame, indices: Vec<u32>) -> Result<ExDataFrame, ExPolarsError> {
     df_read!(data, df, {
-        let new_df = df.take(&indices);
+        let idx = UInt32Chunked::new_from_slice("idx", indices.as_slice());
+        let new_df = df.take(&idx);
         Ok(ExDataFrame::new(new_df))
     })
 }
@@ -475,7 +476,7 @@ pub fn df_insert_at_idx(
 #[rustler::nif]
 pub fn df_slice(
     data: ExDataFrame,
-    offset: usize,
+    offset: i64,
     length: usize,
 ) -> Result<ExDataFrame, ExPolarsError> {
     df_read!(data, df, {
@@ -651,9 +652,9 @@ pub fn df_melt(
 }
 
 #[rustler::nif]
-pub fn df_shift(data: ExDataFrame, periods: i32) -> Result<ExDataFrame, ExPolarsError> {
+pub fn df_shift(data: ExDataFrame, periods: i64) -> Result<ExDataFrame, ExPolarsError> {
     df_read!(data, df, {
-        let new_df = df.shift(periods)?;
+        let new_df = df.shift(periods);
         Ok(ExDataFrame::new(new_df))
     })
 }
